@@ -1,0 +1,58 @@
+name: multi-site-pv-power-forecasting
+title: 面向多光伏场站调度的多跨度功率预测与爬坡事件鲁棒建模
+category: 工程/工科
+agent_type: LLM
+network_required: false
+gpu_required: false
+hardware:
+  cpu_cores: 8
+  memory_gb: 16
+  disk_gb: 20
+environment:
+  python: "3.11"
+  dependencies:
+    - numpy==1.26.4
+    - pandas==2.2.2
+    - scikit-learn==1.4.2
+    - scipy==1.13.0
+    - pyyaml==6.0.1
+entrypoints:
+  train: "python train.py --train-dir dev-data/train --model-dir artifacts"
+  predict: "python predict.py --input <features.csv> --output submission.csv --model-dir artifacts"
+  score: "bash scorer/score.sh agent-start"
+scoring:
+  range: "0-100"
+  metrics:
+    day_rmse_weight: 0.20
+    ramp_rmse_weight: 0.12
+    extreme_ramp_rmse_weight: 0.08
+    peak_rmse_weight: 0.10
+    edge_rmse_weight: 0.06
+    low_sun_rmse_weight: 0.05
+    sunlight_transition_rmse_weight: 0.06
+    station_norm_rmse_weight: 0.07
+    station_bias_mae_weight: 0.04
+    daily_energy_rmse_weight: 0.06
+    horizon_short_rmse_weight: 0.03
+    horizon_mid_rmse_weight: 0.04
+    horizon_long_rmse_weight: 0.07
+    mae_weight: 0.02
+  anchors:
+    weak_baseline_weighted_error: 272.047485
+    reference_weighted_error: 166.461598
+    strong_reference_weighted_error: 150.603459
+    expert_target_weighted_error: 90.000000
+    weak_baseline_score: 0.0
+    reference_score: 2.0
+    strong_reference_score: 5.0
+    observed_16min_hgb_ensemble_weighted_error: 147.406850
+    observed_16min_hgb_ensemble_score: 7.0
+    observed_1h_agent_strong_ensemble_weighted_error: 129.706352
+    observed_1h_agent_strong_ensemble_score: 15.0
+    two_hour_acceptance_ceiling_weighted_error: 112.000000
+    two_hour_acceptance_ceiling_score: 30.0
+    expert_target_score: 100.0
+status:
+  closed_loop_verified: true
+  final_submission_ready: true
+  note: "Agent-visible and scorer-visible package files are scrubbed of raw path and reconstruction markers; project owner retains provenance evidence outside the benchmark package."
