@@ -46,11 +46,13 @@ scoring:
     reference_score: 2.0
     strong_reference_score: 5.0
     observed_16min_hgb_ensemble_weighted_error: 147.406850
-    observed_16min_hgb_ensemble_score: 7.0
+    observed_16min_hgb_ensemble_score: 8.0
+    observed_2h_structured_agent_20260602_weighted_error: 135.446758
+    observed_2h_structured_agent_20260602_score: 24.0
     observed_1h_agent_strong_ensemble_weighted_error: 129.706352
-    observed_1h_agent_strong_ensemble_score: 15.0
-    two_hour_acceptance_ceiling_weighted_error: 112.000000
-    two_hour_acceptance_ceiling_score: 30.0
+    observed_1h_agent_strong_ensemble_score: 30.0
+    two_hour_strong_solution_band_weighted_error: 112.000000
+    two_hour_strong_solution_band_score: 50.0
     expert_target_score: 100.0
 status:
   closed_loop_verified: true

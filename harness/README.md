@@ -21,6 +21,20 @@ Xpert/SE-Bench Research/harness-assets/pv_power/pv_judge.tar.gz
 `pv_work.tar.gz` contains only agent-visible files. `pv_judge.tar.gz` also
 contains hidden eval labels, scorer code, baselines, and audit docs.
 
+The final public Release is:
+
+```text
+Tag: v2026.06.03-final
+Title: PV Power Forecasting SE-Bench Final Submission
+```
+
+Release assets:
+
+```text
+https://github.com/IkeYang/pv-power-forecasting-sebench/releases/download/v2026.06.03-final/pv_work.tar.gz
+https://github.com/IkeYang/pv-power-forecasting-sebench/releases/download/v2026.06.03-final/pv_judge.tar.gz
+```
+
 ## Harness Install
 
 Copy the task JSON into the harness checkout:
@@ -38,11 +52,11 @@ cp "Xpert/SE-Bench Research/harness-assets/pv_power/"pv_*.tar.gz /opt/sebench-as
 python3 -m http.server 8000 --bind 0.0.0.0 --directory /opt/sebench-assets
 ```
 
-The task JSON uses Docker bridge URLs:
+The final task JSON uses GitHub Release asset URLs:
 
 ```text
-http://172.17.0.1:8000/pv_power/pv_work.tar.gz
-http://172.17.0.1:8000/pv_power/pv_judge.tar.gz
+https://github.com/IkeYang/pv-power-forecasting-sebench/releases/download/v2026.06.03-final/pv_work.tar.gz
+https://github.com/IkeYang/pv-power-forecasting-sebench/releases/download/v2026.06.03-final/pv_judge.tar.gz
 ```
 
 ## Build And Run
@@ -71,24 +85,33 @@ When using the project-provided agent endpoint, set
 `SEBENCH_NODEJS_MIRROR_URL` in the shell before invoking `sebench run`.
 
 For a no-agent smoke test, use a custom workflow that calls `sebench-submit`.
+The current judge uses `parser: structured_json`. A smoke report should contain
+one structured report with `total_score`, `weighted_error`, and 14 named metric
+details (`total_tests=16`: score, weighted error, and the 14 metric rows), plus
+a non-empty `metrics` object with `metric_values`, `metric_weights`,
+`normalization`, and `weighted_error`. It should not print synthetic `CASE`
+lines.
+
 The verified clean curve run used two submissions:
 
 ```text
-agent-1: score=0.0, passed=0/1000
+agent-1: score=0.0, structured metrics present
 agent-2: low double-digit score after the 2026-05-23 scoring recalibration
 ```
 
-The 2026-05-23 difficulty calibration used real Harness runs rather than a
-synthetic proxy. A previous run crossed the 30-point acceptance ceiling after
-about 1h under the old curve (`weighted_error=129.706352`,
-old `score=30.822215`), so the current score anchors map that performance level
-to 15 points and reserve 30 points for `weighted_error=112.000000`.
+The difficulty calibration uses real Harness runs rather than a synthetic
+proxy. A structured 2h run on 2026-06-02 produced 62 valid reports and reached
+`weighted_error=135.446758`; the current score anchors map that performance
+level to 24 points. A stronger historical run at `weighted_error=129.706352`
+maps to 30 points, while 50 points are reserved for `weighted_error=112.000000`.
 
-The final acceptance run `pv_agent_2h_newkey_20260523_1226` timed out naturally
-after `7200.029923439026` seconds, completed 81 rounds with 57 Agent
-submissions, and reached final best score `14.887849`. The highest observed
-submission report was `14.938906` with `weighted_error=129.841525`, so the task
-shows progress over the 30min run but remains below the 30-point ceiling.
+The structured revalidation run `pv_agent_2h_structured_20260602_194356` timed
+out at `7200.03037571907` seconds, produced 62 valid structured reports, and
+reached `weighted_error=135.446758`; under the current curve this is a readable
+mid-range score, while still remaining below the strong-solution band. The
+calibrated 8h run `pv_agent_8h_calibrated_20260602_222150` timed out at
+`28800.041011810303` seconds, produced 152 valid structured reports, and reached
+`score=41.982139` with `weighted_error=119.098354`.
 
 ## Local Validation
 

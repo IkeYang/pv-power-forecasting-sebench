@@ -1,7 +1,10 @@
 __pycache__/
 *.pyc
-.pytest_cache/
-.DS_Store
 agent-start/artifacts/
 agent-start/submission.csv
 agent-start/baseline_submission.csv
+scorer/eval-data/*.csv
+scorer/eval-data/*.json
+!scorer/eval-data/README.md
+baseline/
+split_manifest.json
