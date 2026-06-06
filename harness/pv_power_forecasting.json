@@ -21,7 +21,7 @@
   ],
   "work": {
     "setup_cmds": [
-      "mkdir -p /home/workspace && cd /home/workspace && curl -fsSL https://github.com/IkeYang/pv-power-forecasting-sebench/releases/download/v2026.06.03-final/pv_work.tar.gz | tar -xz",
+      "mkdir -p /home/workspace && cd /home/workspace && curl -fsSL https://github.com/IkeYang/pv-power-forecasting-sebench/releases/download/v2026.06.06-canonical/pv_work.tar.gz | tar -xz",
       "cd /home/workspace/pv-power-forecasting/agent-start && python -m pip install -r requirements.txt --index-url \"${PIP_INDEX_URL:-https://pypi.tuna.tsinghua.edu.cn/simple}\" --trusted-host \"${PIP_TRUSTED_HOST:-pypi.tuna.tsinghua.edu.cn}\"",
       "cd /home/workspace/pv-power-forecasting/agent-start && rm -rf .git artifacts submission.csv baseline_submission.csv && git init && git config user.email 'sebench@local' && git config user.name 'sebench' && git add -A && git commit -m 'init'"
     ],
@@ -30,7 +30,7 @@
   },
   "judge": {
     "setup_cmds": [
-      "mkdir -p /home/workspace && cd /home/workspace && curl -fsSL https://github.com/IkeYang/pv-power-forecasting-sebench/releases/download/v2026.06.03-final/pv_judge.tar.gz | tar -xz",
+      "mkdir -p /home/workspace && cd /home/workspace && curl -fsSL https://github.com/IkeYang/pv-power-forecasting-sebench/releases/download/v2026.06.06-canonical/pv_judge.tar.gz | tar -xz",
       "cd /home/workspace/pv-power-forecasting/agent-start && python -m pip install -r requirements.txt --index-url \"${PIP_INDEX_URL:-https://pypi.tuna.tsinghua.edu.cn/simple}\" --trusted-host \"${PIP_TRUSTED_HOST:-pypi.tuna.tsinghua.edu.cn}\""
     ],
     "eval_cmd": "cd /home/workspace/pv-power-forecasting && python scorer/harness_eval.py",

@@ -1,61 +1,43 @@
 # PV Forecasting Pre-Submission Review
 
-Review date: 2026-05-23
+Review date: 2026-06-06
 
 ## Result
 
-The task has a runnable technical closed loop after the difficulty pass. The
-hidden evaluation tail is long enough to measure short/mid/long-horizon
-behavior, and the scorer reports ramp, extreme-ramp, sunlight-transition,
-station-bias, daily-energy, and horizon metrics. Ordinary single-model
-references do not receive high scores.
+The PV task has been refreshed after the leakage audit. The prepared benchmark
+loads only canonical raw `site_v1` observations and excludes shifted
+`site_v2/site_v3` variants before any split is generated. This keeps the
+forecasting task, scorer, CLI, and metric suite intact, while removing the
+train/eval sibling-label path that allowed 21-day or 42-day shifted lookups.
+Hidden eval locations are fully held out from public train labels.
 
-The 2026-06-02 review-feedback pass moved Harness evaluation from `score_sum`
-pseudo cases to `structured_json`. The judge now returns the continuous score
-directly and preserves `weighted_error`, all 14 metric values, metric weights,
-normalization anchors, and runtime fields in `report.json.metrics`.
+The judge uses `structured_json`. It returns the continuous score directly and
+preserves `weighted_error`, all 14 metric values, metric weights, normalization
+anchors, and runtime fields in `report.json.metrics`.
 
 ## Calibration Summary
 
-- Malformed or blank submission: `0.0`.
-- Agent-start weak baseline: `0.0`.
-- Ordinary HistGradientBoosting reference: `2.0`.
-- Capacity-normalized strong reference: `5.0`.
-- Observed 16min Agent HGB ensemble: `8.0`.
-- Observed structured 2h Agent run: `24.0`.
-- Observed stronger historical Agent run: `30.0`.
-- Strong solution band: `50.0`.
-- Expert target: `100.0`.
+- Agent-start weak baseline: `weighted_error=211.329112`, score `0.0`.
+- Location-agnostic HGB reference: `weighted_error=200.552306`, score `5.0`.
+- Observed 30min simple ensemble: `weighted_error=182.502598`, score `14.5`.
+- Target 2h improvement band: `weighted_error=158.000000`, score `22.0`.
+- Target 2h cap band: `weighted_error=125.000000`, score `30.0`; expert target: `weighted_error=90.000000`, score `100.0`.
 
-This confirms the scorer is deterministic, automatic, and has a non-saturating
-improvement range. A real 30min Agent run should stay low, and a real 2h run
-should show visible progress but remain well below the strong-solution band.
-Full score remains reserved for deeper feature discovery, model ensembling,
-ramp-event specialization, daily-energy calibration, station-bias control, and
-long-horizon calibration.
+Local validation confirms the scorer is deterministic and automatic on the
+canonical dataset. The 2026-06-06 leakage audit reports only variant `1` in
+public/eval data, no public/eval location overlap, no non-canonical public/eval
+locations, and zero shifted temporal proxy hits at `+/-21` or `+/-42` days.
 
-## Harness Evidence
+## Harness Acceptance
 
-Real Harness runs were used to validate the task:
+Recalibrated Harness acceptance completed on 2026-06-06:
 
-- 30min run `pv_agent_30m_20260523_0331`: timed out naturally after about
-  1800 seconds, completed 7 rounds, and reached best score `3.4332`.
-- Structured smoke run `pv_agent_smoke_structured3_20260602_172440`: timed out
-  naturally after about 900 seconds and reached best score `14.206642`; the
-  best report includes `total_score`, `weighted_error`, and all 14 metric
-  values.
-- Structured 2h run `pv_agent_2h_structured_20260602_194356`: timed out
-  naturally after about 7200 seconds, produced 62 valid structured reports, and
-  reached `weighted_error=135.446758`; calibrated rescore is about `23.998468`.
-- Calibrated 8h run `pv_agent_8h_calibrated_20260602_222150`: timed out
-  naturally after about 28800 seconds, produced 152 valid structured reports,
-  and reached `score=41.982139` with `weighted_error=119.098354`.
+- 30min run `pv_agent_recalibrated_30m_20260606_1921`: best score `12.757743`.
+- 2h run `pv_agent_recalibrated_2h_20260606_2000`: best score `17.009971`.
 
-This satisfies the intended difficulty shape: the 2h Agent run improves over
-30min, the 8h run improves over 2h, neither approaches full score, and the score
-continues to have room for stronger long-horizon, ramp-event, station-bias, and
-ensemble work.
+Both runs used structured JSON reports with 14 metric values and no bad
+reports. The 30min score stayed below 15, and the 2h score improved while
+remaining below 30.
 
-The private evidence bundle contains run IDs, summaries, and selected logs.
 Credentials, API keys, SSH details, hidden labels, and raw provenance files are
-not included in this public clean package.
+not included in this public clean repository package.

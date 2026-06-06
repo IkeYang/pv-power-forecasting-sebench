@@ -18,21 +18,21 @@ Xpert/SE-Bench Research/harness-assets/pv_power/pv_work.tar.gz
 Xpert/SE-Bench Research/harness-assets/pv_power/pv_judge.tar.gz
 ```
 
-`pv_work.tar.gz` contains only agent-visible files. `pv_judge.tar.gz` also
-contains hidden eval labels, scorer code, baselines, and audit docs.
+`pv_work.tar.gz` contains only agent-visible files. `pv_judge.tar.gz` contains
+hidden eval labels, scorer code, baselines, and audit docs for the judge image.
 
-The final public Release is:
+The refreshed public Release is:
 
 ```text
-Tag: v2026.06.03-final
-Title: PV Power Forecasting SE-Bench Final Submission
+Tag: v2026.06.06-canonical
+Title: PV Power Forecasting SE-Bench Canonical Data Refresh
 ```
 
 Release assets:
 
 ```text
-https://github.com/IkeYang/pv-power-forecasting-sebench/releases/download/v2026.06.03-final/pv_work.tar.gz
-https://github.com/IkeYang/pv-power-forecasting-sebench/releases/download/v2026.06.03-final/pv_judge.tar.gz
+https://github.com/IkeYang/pv-power-forecasting-sebench/releases/download/v2026.06.06-canonical/pv_work.tar.gz
+https://github.com/IkeYang/pv-power-forecasting-sebench/releases/download/v2026.06.06-canonical/pv_judge.tar.gz
 ```
 
 ## Harness Install
@@ -44,7 +44,7 @@ cp "Xpert/SE-Bench Research/pv-power-forecasting/harness/pv_power_forecasting.js
   /root/SE-bench-main/tasks/pv_power_forecasting.json
 ```
 
-Host the assets from the Harness server host:
+For local smoke tests, host both assets from the Harness server host:
 
 ```bash
 mkdir -p /opt/sebench-assets/pv_power
@@ -52,11 +52,11 @@ cp "Xpert/SE-Bench Research/harness-assets/pv_power/"pv_*.tar.gz /opt/sebench-as
 python3 -m http.server 8000 --bind 0.0.0.0 --directory /opt/sebench-assets
 ```
 
-The final task JSON uses GitHub Release asset URLs:
+The final task JSON downloads both assets from the GitHub Release:
 
 ```text
-https://github.com/IkeYang/pv-power-forecasting-sebench/releases/download/v2026.06.03-final/pv_work.tar.gz
-https://github.com/IkeYang/pv-power-forecasting-sebench/releases/download/v2026.06.03-final/pv_judge.tar.gz
+https://github.com/IkeYang/pv-power-forecasting-sebench/releases/download/v2026.06.06-canonical/pv_work.tar.gz
+https://github.com/IkeYang/pv-power-forecasting-sebench/releases/download/v2026.06.06-canonical/pv_judge.tar.gz
 ```
 
 ## Build And Run
@@ -92,32 +92,44 @@ a non-empty `metrics` object with `metric_values`, `metric_weights`,
 `normalization`, and `weighted_error`. It should not print synthetic `CASE`
 lines.
 
-The verified clean curve run used two submissions:
+## Current Calibration Status
+
+The 2026-06-06 data refresh keeps only canonical raw `site_v1` observations,
+excludes shifted `site_v2/site_v3` variants before splitting, and fully holds
+out hidden eval locations from public train labels. The prepared data now has
+1,372,483 cleaned rows, 1,012,131 agent-visible train rows, 96,839 public dev
+rows, and 263,513 hidden eval rows across 17 canonical locations.
+
+Local recalibration on the refreshed data uses these anchors:
 
 ```text
-agent-1: score=0.0, structured metrics present
-agent-2: low double-digit score after the 2026-05-23 scoring recalibration
+weak baseline: weighted_error=211.329112, score=0.0
+location-agnostic HGB reference: weighted_error=200.552306, score=5.0
+observed 30min simple ensemble: weighted_error=182.502598, score=14.5
+target 2h improvement band: weighted_error=158.000000, score=22.0
+target 2h cap band: weighted_error=125.000000, score=30.0
+expert target: weighted_error=90.000000, score=100.0
 ```
 
-The difficulty calibration uses real Harness runs rather than a synthetic
-proxy. A structured 2h run on 2026-06-02 produced 62 valid reports and reached
-`weighted_error=135.446758`; the current score anchors map that performance
-level to 24 points. A stronger historical run at `weighted_error=129.706352`
-maps to 30 points, while 50 points are reserved for `weighted_error=112.000000`.
+Recalibrated Harness acceptance completed on 2026-06-06:
 
-The structured revalidation run `pv_agent_2h_structured_20260602_194356` timed
-out at `7200.03037571907` seconds, produced 62 valid structured reports, and
-reached `weighted_error=135.446758`; under the current curve this is a readable
-mid-range score, while still remaining below the strong-solution band. The
-calibrated 8h run `pv_agent_8h_calibrated_20260602_222150` timed out at
-`28800.041011810303` seconds, produced 152 valid structured reports, and reached
-`score=41.982139` with `weighted_error=119.098354`.
+```text
+30min run pv_agent_recalibrated_30m_20260606_1921: best score=12.757743
+2h run    pv_agent_recalibrated_2h_20260606_2000: best score=17.009971
+```
+
+Both runs used structured JSON reports with 14 metric values and no bad
+reports. The 30min score stayed below 15, and the 2h score improved while
+remaining below 30.
 
 ## Local Validation
 
 ```bash
 python -m pytest \
   "Xpert/SE-Bench Research/tests/test_prepare_pv_benchmark.py" \
+  "Xpert/SE-Bench Research/tests/test_audit_pv_leakage.py" \
   "Xpert/SE-Bench Research/tests/test_pv_scorer.py" \
+  "Xpert/SE-Bench Research/tests/test_pv_harness_config.py" \
+  "Xpert/SE-Bench Research/tests/test_package_pv_harness_assets.py" \
   -q
 ```
